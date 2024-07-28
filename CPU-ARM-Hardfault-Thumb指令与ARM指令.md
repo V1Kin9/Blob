@@ -9,6 +9,7 @@
 2. BX指令是具有切换架构状态的能力，即可以切换架构为ARM或Thumb状态。Thumb指令是16 bit（Thumb-2是32 bit）的，而ARM指令是32 bit。
 
 3. 在调试的过程中，看到J-Link-commander会提示架构与指令不符的提示，然后有自动修改CPSR.T的操作（把对应的bit修改为合法的值）
+   https://wiki.segger.com/J-Link_Command_Strings#DisableCortexMXPSRAutoCorrectTBit
 
 ## 结论
 
