@@ -1,0 +1,18 @@
+# 背景
+最近在调试ARM的CPU，发现ARMv7-M架构的异常处理与RISC-V有一些差异，因此在此记录一下两个架构间的差异
+
+## ARM的“XCAUSE”
+ARM的异常架构也有类似RISC-V的XCAUSE的原因异常寄存器，它简写为CFSR(Configurable Fault Status Register)。它是一个32bit的寄存器(ARMv7-M 32-bit CPU)，用法与RISC-V大同小异，用于表征CPU的异常原因。
+CFSR主要分为三个部分，分别是UFSR(UsageFault Status Register)、BFSR(BusFault Status Register)和MMFSR(MemManage Fault Status Register)。这里比较有意思的是ARM会把RISC-V里面的访存相关的异常分为
+MemManage Fault和BusFault，我个人猜测这个设计是为了把MPU的异常原因跟总线行为的异常原因区分开，以此更好地兼容TEE的总线设计。
+在面对有一些总线ECC设计的SoC上，似乎这个设计会更精确地表明异常时来自总线上（ECC报错机制是基于总线response）
+
+## ARM的“XEPC”
+ARMv7-M可能出于对CPU gatecount的考虑，并没有分配一个专门的寄存器用于存放异常地址，在这点上会使调试比较麻烦。
+由于ARM的大部分异常都是同步的，所以，在触发异常时CPU会把对应的PC压栈到PSP或MSP，并且会在LR寄存器中明确告知是压栈到PSP还是MSP。
+所以对于软件的调试，可以基于LR提供的信息，获取发生异常时的栈指针，然后，按照硬件压栈的顺序，获取对应的PC（SP + 7 * XLEN）。
+
+TODD: 补充ARMv7-A/ARMv8的异常返回地址
+
+# 总结
+ARM的异常处理对比RISC-V而言大同小异，但在某些特定情境下，ARM的异常报错机制更准确，更便于定位问题。
